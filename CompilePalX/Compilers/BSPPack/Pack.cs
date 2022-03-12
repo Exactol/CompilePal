@@ -219,6 +219,12 @@ namespace CompilePalX.Compilers.BSPPack
 
                 CompilePalLogger.LogLine("Finding sources of game content...");
                 sourceDirectories = GetSourceDirectories(gameFolder);
+                if (verbose)
+                {
+                    CompilePalLogger.LogLine("Source directories:");
+                    foreach (var sourceDirectory in sourceDirectories)
+                        CompilePalLogger.LogLine(sourceDirectory);
+                }
 
                 CompilePalLogger.LogLine("Reading BSP...");
                 BSP map = new BSP(new FileInfo(bspPath));
@@ -247,7 +253,7 @@ namespace CompilePalX.Compilers.BSPPack
                         if (fileListParam.Length <= 1 || string.IsNullOrWhiteSpace(fileListParam[1]))
                         {
                             CompilePalLogger.LogCompileError("No file list parameter set\n",
-                                new Error("No file list parameterparameter  set", ErrorSeverity.Error));
+                                new Error("No file list parameter set", ErrorSeverity.Error));
                             continue;
                         }
 
@@ -365,6 +371,8 @@ namespace CompilePalX.Compilers.BSPPack
                     CompilePalLogger.LogLine(pakfile.effectscriptcount + " effect scripts found");
                 if (pakfile.vscriptcount != 0)
                     CompilePalLogger.LogLine(pakfile.vscriptcount + " vscripts found");
+                if (pakfile.panoramaMapIconCount != 0)
+                    CompilePalLogger.LogLine(pakfile.panoramaMapIconCount + " panorama map icons found");
                 string additionalFiles =
                     (map.nav.Key != default(string) ? "\n-nav file" : "") +
                     (map.soundscape.Key != default(string) ? "\n-soundscape" : "") +
@@ -623,12 +631,20 @@ namespace CompilePalX.Compilers.BSPPack
                         }
                         else
                         {
-	                        string fullPath = System.IO.Path.GetFullPath(rootPath + "\\" + path.TrimEnd('\\'));
+                            try
+                            {
+                                string fullPath = System.IO.Path.GetFullPath(rootPath + "\\" + path.TrimEnd('\\'));
 
-	                        if (verbose)
-		                        CompilePalLogger.LogLine("Found search path: {0}", fullPath);
+                                if (verbose)
+                                    CompilePalLogger.LogLine("Found search path: {0}", fullPath);
 
-	                        sourceDirectories.Add(fullPath);
+                                sourceDirectories.Add(fullPath);
+                            }
+                            catch (Exception e)
+                            {
+                                CompilePalLogger.LogDebug("Failed to find search path: " + e);
+                                CompilePalLogger.LogCompileError($"Search path invalid: {rootPath + "\\" + path.TrimEnd('\\')}", new Error($"Search path invalid: {rootPath + "\\" + path.TrimEnd('\\')}", ErrorSeverity.Caution));
+                            }
                         }
                     }
                     else

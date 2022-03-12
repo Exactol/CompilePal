@@ -8,11 +8,14 @@
             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
 
             Title="Compile Pal X"
-                          MinHeight="550" MinWidth="790"
-                          Height="550" Width="790"
-                          Closing="MetroWindow_Closing"
-                          IconEdgeMode="Aliased" Icon="CompilePalIcon.ico" ShowIconOnTitleBar="False" 
-                          Activated="MetroWindow_Activated" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}" >
+            MinHeight="550" MinWidth="790"
+            Height="550" Width="790"
+            Closing="MetroWindow_Closing"
+            IconEdgeMode="Aliased" Icon="CompilePalIcon.ico" ShowIconOnTitleBar="False" 
+            Activated="MetroWindow_Activated" 
+            BorderThickness="1" 
+            BorderBrush="{DynamicResource AccentColorBrush}" 
+        >
 
     <controls:MetroWindow.LeftWindowCommands>
         <controls:WindowCommands>
@@ -36,7 +39,16 @@
             <RowDefinition Height="5"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-        <ListBox x:Name="MapListBox" Grid.Row="0" Margin="10,10,95,0" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="1"></ListBox>
+        <ListBox x:Name="MapListBox" Grid.Row="0" Margin="10,10,95,0" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="1">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel HorizontalAlignment="Stretch">
+                        <TextBlock Text="{Binding File}" Margin="0, 0, 5, 0"/>
+                        <CheckBox IsChecked="{Binding Compile, Mode=TwoWay}" HorizontalAlignment="Right" />
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
         <Button x:Name="AddMapButton"  Grid.Row="0" Content="Add Map..." Margin="0,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75" Click="AddMapButton_Click"/>
         <Button x:Name="RemoveMapButton"  Grid.Row="0" Content="Remove" Margin="0,45,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75" Click="RemoveMapButton_Click"/>
         <GridSplitter Grid.Row="1" Height="2" HorizontalAlignment="Stretch" Width="512"></GridSplitter>
@@ -204,13 +216,17 @@
             </controls:MetroTabItem>
             <controls:MetroTabItem Name="OutputTab" Header="OUTPUT">
                 <Grid Background="#FFE5E5E5">
-                    <RichTextBox IsReadOnly="True" x:Name="CompileOutputTextbox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" BorderThickness="0"  Margin="10,10,10,10" FontFamily="Segoe UI, Lucida Sans Unicode, Verdana" IsReadOnlyCaretVisible="True" Block.LineHeight="2" IsDocumentEnabled="True">
+                    <RichTextBox IsReadOnly="True" x:Name="CompileOutputTextbox" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" BorderThickness="0" Margin="10,10,10,10" FontFamily="Segoe UI, Lucida Sans Unicode, Verdana" IsReadOnlyCaretVisible="True" Block.LineHeight="2" IsDocumentEnabled="True">
                         <RichTextBox.Document>
                             <FlowDocument>
                                 <Paragraph Name="OutputParagraph"></Paragraph>
                             </FlowDocument>
                         </RichTextBox.Document>
                     </RichTextBox>
+                    <!--Scroll to bottom button, probably not needed-->
+                    <!--<Button Click="ConfigBack_OnClick" ToolTip="Scroll To Bottom" x:Name="Tmp" HorizontalAlignment="Right" VerticalAlignment="Bottom" Background="Red" Margin="100, 100, 30, 15" Foreground="White" >
+                        <iconPacks:Material Kind="ArrowDown" />
+                    </Button>-->
                 </Grid>
 
             </controls:MetroTabItem>

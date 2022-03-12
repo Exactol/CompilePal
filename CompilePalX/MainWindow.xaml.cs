@@ -135,7 +135,7 @@ namespace CompilePalX
                         if (File.Exists(argPath))
                         {
                             if (argPath.EndsWith(".vmf") || argPath.EndsWith(".vmm") || argPath.EndsWith(".vmx"))
-                                CompilingManager.MapFiles.Add(argPath);
+                                CompilingManager.MapFiles.Add(new Map(argPath));
                         }
                     }
 
@@ -160,7 +160,7 @@ namespace CompilePalX
                 errorLink.Inlines.Add(text);
                 if (e.ID >= 0)
                 {
-                    errorLink.TargetName = e.ID.ToString();
+                    errorLink.DataContext = e;
                     errorLink.Click += errorLink_Click;
                 }
 
@@ -182,9 +182,9 @@ namespace CompilePalX
         static void errorLink_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             var link = (Hyperlink)sender;
-            int errorCode = int.Parse(link.TargetName);
+            Error error = (Error)link.DataContext;
 
-            ErrorFinder.ShowErrorDialog(errorCode);
+            ErrorFinder.ShowErrorDialog(error);
         }
         
 
@@ -202,7 +202,10 @@ namespace CompilePalX
 
                 OutputParagraph.Inlines.Add(textRun);
 
-                CompileOutputTextbox.ScrollToEnd();
+                // scroll to end only if already scrolled to the bottom. 1.0 is an epsilon value for double comparison
+                if (CompileOutputTextbox.VerticalOffset + CompileOutputTextbox.ViewportHeight >= CompileOutputTextbox.ExtentHeight - 1.0)
+                    CompileOutputTextbox.ScrollToEnd();
+
                 return textRun;
             });
         }
@@ -481,6 +484,17 @@ namespace CompilePalX
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            // prevent users from accidentally closing during a compile
+            if (CompilingManager.IsCompiling)
+            {
+                MessageBoxResult cancelBoxResult = MessageBox.Show("Compile in progress, are you sure you want to cancel?", "Cancel Confirmation", System.Windows.MessageBoxButton.YesNo);
+                if (cancelBoxResult != MessageBoxResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
             ConfigurationManager.SavePresets();
             ConfigurationManager.SaveProcesses();
 
@@ -630,13 +644,13 @@ namespace CompilePalX
 
             foreach (var file in dialog.FileNames)
             {
-                CompilingManager.MapFiles.Add(file);
+                CompilingManager.MapFiles.Add(new Map(file));
             }
         }
 
         private void RemoveMapButton_Click(object sender, RoutedEventArgs e)
         {
-            string selectedMap = (string)MapListBox.SelectedItem;
+            Map selectedMap = (Map)MapListBox.SelectedItem;
 
             if (selectedMap != null)
                 CompilingManager.MapFiles.Remove(selectedMap);
